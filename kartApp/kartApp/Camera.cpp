@@ -18,7 +18,7 @@ void Camera::updateMatrix(float FOVdeg, float nearPlane, float farPlane)
 	// Makes camera look in the right direction from the right position
 	view = glm::lookAt(Position, Position + Orientation, Up);
 	// Adds perspective to the scene
-	projection = glm::perspective(glm::radians(FOVdeg), (float)width / height, nearPlane, farPlane);
+    projection = glm::perspective(glm::radians(FOVdeg), (float)width / height, nearPlane, farPlane);
 
 	// Sets new camera matrix
 	cameraMatrix = projection * view;
@@ -42,6 +42,24 @@ void Camera::Inputs(GLFWwindow* window)
     }
     else
     {
+        // Handles WASD inputs
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        {
+            Position += speed * Orientation;
+        }
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        {
+            Position += speed * -Orientation;
+        }
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        {
+            Position += speed * -glm::normalize(glm::cross(Orientation, Up));
+        }
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        {
+            Position += speed * glm::normalize(glm::cross(Orientation, Up));
+        }
+
         // Handles mouse inputs
         // Hides mouse cursor
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -73,3 +91,5 @@ void Camera::Inputs(GLFWwindow* window)
         glfwSetCursorPos(window, (width / 2), (height / 2));
     }
 }
+
+

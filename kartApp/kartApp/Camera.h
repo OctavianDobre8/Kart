@@ -21,6 +21,9 @@ public:
 	glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::mat4 cameraMatrix = glm::mat4(1.0f);
 
+
+
+
 	// Prevents the camera from jumping around when first clicking left click
 	bool firstClick = true;
 
@@ -41,4 +44,8 @@ public:
 	void Matrix(Shader& shader, const char* uniform);
 	// Handles camera inputs
 	void Inputs(GLFWwindow* window);
+
+	glm::vec3 getPosition() { return Position; }
+
+	static void scroll_callback(GLFWwindow* window, double xpos, double ypos);
 };
