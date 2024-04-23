@@ -9,11 +9,6 @@ namespace fs = std::filesystem;
 #include <iostream>
 #include "Shader.h"
 #include "Camera.h"
-//#include "Model.h"
-
-
-//learnopengl includes
-//#include <learnopengl/model.h>
 
 //includes
 #include <GL/glew.h>
@@ -70,9 +65,6 @@ unsigned int skyboxIndices[] =
 
 
 
-
-
-
 int main()
 {
 	// Initialize GLFW
@@ -99,6 +91,7 @@ int main()
 	// Specify the viewport of OpenGL in the Window
 	// In this case the viewport goes from x = 0, y = 0, to the x = height and y = width (declared above)
 	glViewport(0, 0, width, height);
+
 
 
 
@@ -137,8 +130,8 @@ int main()
 
 
 
-
 	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
+
 
 
 
@@ -186,7 +179,7 @@ int main()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
+	
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -267,10 +260,6 @@ int main()
 		camera.Inputs(window);
 		// Updates and exports the camera matrix to the Vertex Shader
 		camera.updateMatrix(45.0f, 0.1f, 100.0f);
-
-
-	//	model.Draw(shaderProgram, camera);
-
 
 		glDepthFunc(GL_LEQUAL);
 
