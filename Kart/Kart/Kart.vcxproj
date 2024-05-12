@@ -79,7 +79,7 @@
     <LibraryPath>..\_external\glew-2.1.0\lib\Release\x64;..\_external\glfw-3.3.4.bin.WIN64\lib-vc2019;..\packages\Assimp.3.0.0\build\native\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>..\_external\glew-2.1.0\include;..\_external\glfw-3.3.4.bin.WIN64\include\GLFW;..\_external\glm;..\_external\freeglut\include;..\_external\stb;..\packages\Assimp.3.0.0\build\native\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\packages\Assimp.3.0.0\build\native\include;..\_external\glm;..\_external\glfw-3.3.4.bin.WIN64\include\GLFW;..\_external\freeglut\include;..\_external\glew-2.1.0\include;..\_external\stb;$(IncludePath)</IncludePath>
     <LibraryPath>..\_external\glew-2.1.0\lib\Release\x64;..\_external\glfw-3.3.4.bin.WIN64\lib-vc2019;..\packages\Assimp.3.0.0\build\native\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -149,10 +149,22 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Kart.cpp" />
+    <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ECameraMovementType.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="Vertex.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Floor.fs">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="Floor.vs">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
