@@ -185,6 +185,12 @@ int main(int argc, char** argv)
 	std::string BushObjFileName = (currentPath + "\\resources\\models\\Bush\\skSpikyPlantMesh.obj");
 	Model bushObjModel(BushObjFileName, false);
 
+	std::string GoombaObjFileName = (currentPath + "\\resources\\models\\Goomba\\goomba.obj");
+	Model goombaObjModel(GoombaObjFileName, false);
+
+	std::string MarioObjFileName = (currentPath + "\\resources\\models\\Mario\\mario.obj");
+	Model marioObjModel(MarioObjFileName, false);
+
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
 		// per-frame time logic
@@ -240,6 +246,26 @@ int main(int argc, char** argv)
 		lightingShader.SetMat4("model", kartModel);
 		kartObjModel.Draw(lightingShader);
 
+		// Mario position
+		glm::mat4 marioModel = glm::mat4(1.0f);
+		marioModel = glm::translate(marioModel, glm::vec3(4.6f, -0.4f, -1.0f));
+		marioModel = glm::scale(marioModel, glm::vec3(0.005f));
+
+		// Mario Texture
+		shaderBlending.Use();
+		shaderBlending.SetMat4("projection", projection);
+		shaderBlending.SetMat4("view", view);
+		shaderBlending.SetMat4("model", marioModel);
+
+		lightingShader.Use();
+		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
+		lightingShader.SetVec3("lightPos", lightPos);
+		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
+		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
+		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
+		lightingShader.SetMat4("model", marioModel);
+		marioObjModel.Draw(lightingShader);
+
 		// Tree1 position
 		glm::mat4 treeModel1 = glm::mat4(1.0f);
 		treeModel1 = glm::translate(treeModel1, glm::vec3(3.0f, -0.46f, -1.0f));
@@ -251,9 +277,6 @@ int main(int argc, char** argv)
 		shaderBlending.SetMat4("view", view);
 		shaderBlending.SetMat4("model", treeModel1);
 		glBindTexture(GL_TEXTURE_2D, treeTexture);
-
-		glBindVertexArray(floorVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		lightingShader.Use();
 		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
@@ -276,9 +299,6 @@ int main(int argc, char** argv)
 		shaderBlending.SetMat4("model", treeModel2);
 		glBindTexture(GL_TEXTURE_2D, treeTexture);
 
-		glBindVertexArray(floorVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 		lightingShader.Use();
 		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
 		lightingShader.SetVec3("lightPos", lightPos);
@@ -299,9 +319,6 @@ int main(int argc, char** argv)
 		shaderBlending.SetMat4("view", view);
 		shaderBlending.SetMat4("model", treeModel3);
 		glBindTexture(GL_TEXTURE_2D, treeTexture);
-
-		glBindVertexArray(floorVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		lightingShader.Use();
 		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
@@ -324,9 +341,6 @@ int main(int argc, char** argv)
 		shaderBlending.SetMat4("model", treeModel4);
 		glBindTexture(GL_TEXTURE_2D, treeTexture);
 
-		glBindVertexArray(floorVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 		lightingShader.Use();
 		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
 		lightingShader.SetVec3("lightPos", lightPos);
@@ -348,9 +362,6 @@ int main(int argc, char** argv)
 		shaderBlending.SetMat4("model", treeModel5);
 		glBindTexture(GL_TEXTURE_2D, treeTexture);
 
-		glBindVertexArray(floorVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 		lightingShader.Use();
 		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
 		lightingShader.SetVec3("lightPos", lightPos);
@@ -371,9 +382,6 @@ int main(int argc, char** argv)
 		shaderBlending.SetMat4("view", view);
 		shaderBlending.SetMat4("model", treeModel6);
 		glBindTexture(GL_TEXTURE_2D, treeTexture);
-
-		glBindVertexArray(floorVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		lightingShader.Use();
 		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
@@ -401,9 +409,6 @@ int main(int argc, char** argv)
 		shaderBlending.SetMat4("model", treeModel7);
 		glBindTexture(GL_TEXTURE_2D, treeTexture);
 
-		glBindVertexArray(floorVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 		lightingShader.Use();
 		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
 		lightingShader.SetVec3("lightPos", lightPos);
@@ -425,10 +430,6 @@ int main(int argc, char** argv)
 		bushModel1 = glm::rotate(bushModel1, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		// Bush1 Texture
-
-		glBindVertexArray(floorVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 		lightingShader.Use();
 		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
 		lightingShader.SetVec3("lightPos", lightPos);
@@ -449,10 +450,6 @@ int main(int argc, char** argv)
 		bushModel2 = glm::scale(bushModel2, glm::vec3(0.009f));
 
 		// Bush2 Texture
-
-		glBindVertexArray(floorVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 		lightingShader.Use();
 		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
 		lightingShader.SetVec3("lightPos", lightPos);
@@ -474,10 +471,6 @@ int main(int argc, char** argv)
 		bushModel3 = glm::rotate(bushModel3, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		// Bush3 Texture
-
-		glBindVertexArray(floorVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 		lightingShader.Use();
 		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
 		lightingShader.SetVec3("lightPos", lightPos);
@@ -494,10 +487,6 @@ int main(int argc, char** argv)
 		bushModel4 = glm::rotate(bushModel4, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		// Bush4 Texture
-
-		glBindVertexArray(floorVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 		lightingShader.Use();
 		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
 		lightingShader.SetVec3("lightPos", lightPos);
@@ -519,10 +508,6 @@ int main(int argc, char** argv)
 		bushModel5 = glm::rotate(bushModel5, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		// Bush5 Texture
-
-		glBindVertexArray(floorVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 		lightingShader.Use();
 		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
 		lightingShader.SetVec3("lightPos", lightPos);
@@ -544,10 +529,6 @@ int main(int argc, char** argv)
 		bushModel6 = glm::scale(bushModel6, glm::vec3(0.009f));
 
 		// Bush6 Texture
-
-		glBindVertexArray(floorVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 		lightingShader.Use();
 		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
 		lightingShader.SetVec3("lightPos", lightPos);
@@ -568,10 +549,6 @@ int main(int argc, char** argv)
 		bushModel7 = glm::scale(bushModel7, glm::vec3(0.009f));
 
 		// Bush7 Texture
-
-		glBindVertexArray(floorVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 		lightingShader.Use();
 		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
 		lightingShader.SetVec3("lightPos", lightPos);
@@ -592,10 +569,6 @@ int main(int argc, char** argv)
 		bushModel8 = glm::scale(bushModel8, glm::vec3(0.009f));
 
 		// Bush8 Texture
-
-		glBindVertexArray(floorVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 		lightingShader.Use();
 		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
 		lightingShader.SetVec3("lightPos", lightPos);
@@ -604,6 +577,54 @@ int main(int argc, char** argv)
 		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
 		lightingShader.SetMat4("model", bushModel8);
 		bushObjModel.Draw(lightingShader);
+
+		// Goomba1 position
+		glm::mat4 goombaModel1 = glm::mat4(1.0f);
+		goombaModel1 = glm::translate(goombaModel1, glm::vec3(-2.0f, -0.50f, 4.6f));
+		goombaModel1 = glm::scale(goombaModel1, glm::vec3(0.002f));
+		goombaModel1 = glm::rotate(goombaModel1, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		// Goomba1 Texture
+		lightingShader.Use();
+		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
+		lightingShader.SetVec3("lightPos", lightPos);
+		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
+		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
+		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
+		lightingShader.SetMat4("model", goombaModel1);
+		goombaObjModel.Draw(lightingShader);
+
+		// Goomba2 position
+		glm::mat4 goombaModel2 = glm::mat4(1.0f);
+		goombaModel2 = glm::translate(goombaModel2, glm::vec3(-3.7f, -0.50f, 3.6f));
+		goombaModel2 = glm::scale(goombaModel2, glm::vec3(0.002f));
+		goombaModel2 = glm::rotate(goombaModel2, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		// Goomba2 Texture
+		lightingShader.Use();
+		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
+		lightingShader.SetVec3("lightPos", lightPos);
+		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
+		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
+		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
+		lightingShader.SetMat4("model", goombaModel2);
+		goombaObjModel.Draw(lightingShader);
+
+		// Goomba3 position
+		glm::mat4 goombaModel3 = glm::mat4(1.0f);
+		goombaModel3 = glm::translate(goombaModel3, glm::vec3(-4.0f, -0.50f, 2.0f));
+		goombaModel3 = glm::scale(goombaModel3, glm::vec3(0.002f));
+		goombaModel3 = glm::rotate(goombaModel3, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		// Goomba3 Texture
+		lightingShader.Use();
+		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
+		lightingShader.SetVec3("lightPos", lightPos);
+		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
+		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
+		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
+		lightingShader.SetMat4("model", goombaModel3);
+		goombaObjModel.Draw(lightingShader);
 
 		shaderBlending.Use();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
