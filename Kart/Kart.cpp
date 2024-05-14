@@ -1,4 +1,4 @@
-#include <stdlib.h> 
+﻿#include <stdlib.h> 
 #include <stdio.h>
 #include <math.h> 
 #include <vector>
@@ -198,6 +198,9 @@ int main(int argc, char** argv)
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
+		lightPos.x = 5;
+		lightPos.z = 5;
+
 		// input
 		processInput(window);
 
@@ -205,22 +208,23 @@ int main(int argc, char** argv)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glm::mat4 model = glm::mat4(1.0);
-
-		shaderFloor.Use();
 		glm::mat4 projection = pCamera->GetProjectionMatrix();
 		glm::mat4 view = pCamera->GetViewMatrix();
-		shaderFloor.SetMat4("projection", projection);
-		shaderFloor.SetMat4("view", view);
 
-		// Draw floor
+		lightingShader.Use();
+		lightingShader.SetMat4("projection", projection);
+		lightingShader.SetMat4("view", view);
+		lightingShader.SetMat4("model", model); // model este matricea pentru floor
+
+		// Trimite informațiile despre iluminare la shader
+		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f); // culoarea luminii
+		lightingShader.SetVec3("lightPos", lightPos); // poziția luminii
+		lightingShader.SetVec3("viewPos", pCamera->GetPosition()); // poziția camerei
+
+		// Desenează floor-ul
 		glBindVertexArray(floorVAO);
 		glBindTexture(GL_TEXTURE_2D, floorTexture);
-
-		shaderFloor.SetMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-
-		lightPos.x = 0;
-		lightPos.z = 0;
 
 		// Kart position
 		glm::mat4 kartModel = glm::mat4(1.0f);
@@ -719,8 +723,8 @@ unsigned int CreateTexture(const std::string& strTexturePath)
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		// set the texture wrapping parameters
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		// set texture filtering parameters
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
