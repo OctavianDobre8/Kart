@@ -7,9 +7,9 @@ KartModel::KartModel()
     velocity(0.0f, 0.0f, 0.0f),
     acceleration(0.0f, 0.0f, 0.0f),
     direction(0.0f),
-    speed(30.0f),
-    brakeForce(10.0f),
-    turnSpeed(90.0f) {} // Adjusted turn speed for more responsive turning
+    speed(35.0f),
+    brakeForce(40.0f),
+    turnSpeed(150.0f) {} // Adjusted turn speed for more responsive turning
 
 void KartModel::handleInput(GLFWwindow* window, float deltaTime) {
     float radianDirection = glm::radians(direction);

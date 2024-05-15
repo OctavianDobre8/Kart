@@ -214,20 +214,26 @@ int main(int argc, char** argv)
 		glm::vec3 kartPosition = kart.getPosition();
 		float kartDirection = kart.getDirection();
 
-		// Update the camera position to be just behind the kart
-		float distanceBehind = 2.0f; // Adjust this distance as needed
+		// Calculate the camera's position just behind the kart
+		float distanceBehind = 0.6f; // Adjust this distance as needed
 		glm::vec3 cameraOffset = glm::vec3(-distanceBehind * sin(glm::radians(kartDirection)), 0.5f, -distanceBehind * cos(glm::radians(kartDirection)));
 		glm::vec3 cameraPosition = kartPosition + cameraOffset;
-		pCamera->SetPosition(cameraPosition);
 
-		// Calculate the camera direction based on the kart's direction, ignoring roll
-		glm::vec3 cameraDirection = glm::vec3(sin(glm::radians(kartDirection)), 0.0f, cos(glm::radians(kartDirection)));
+		// Calculate the camera's target position, slightly in front of the kart
+		float distanceAhead = 0.5f; // Adjust this distance as needed
+		glm::vec3 targetOffset = glm::vec3(distanceAhead * sin(glm::radians(kartDirection)), 0.0f, distanceAhead * cos(glm::radians(kartDirection)));
+		glm::vec3 targetPosition = kartPosition + targetOffset;
+
+		// Calculate the direction from the camera position to the target position
+		glm::vec3 cameraDirection = glm::normalize(targetPosition - cameraPosition);
+
+		// Set the camera's position and direction
+		pCamera->SetPosition(cameraPosition);
 		pCamera->SetDirection(cameraDirection);
 
 		// Render the scene with the updated camera position and direction
 		glm::mat4 projection = pCamera->GetProjectionMatrix();
 		glm::mat4 view = pCamera->GetViewMatrix();
-
 
 
 
