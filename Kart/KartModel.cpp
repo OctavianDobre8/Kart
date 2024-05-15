@@ -1,34 +1,69 @@
-#include "KartModel.h"
+﻿#include "KartModel.h"
 #include <cmath>
+#include <glm.hpp>
 
-KartModel:: KartModel() : position(3.9f, -0.46f, -1.0f), velocity(0.0f, 0.0f, 0.0f), acceleration(0.0f, 0.0f, 0.0f), direction(0.0f), speed(10.0f), brakeForce(20.0f), turnSpeed(0.01f) {}
+KartModel::KartModel()
+    : position(3.9f, -0.46f, -1.0f),
+    velocity(0.0f, 0.0f, 0.0f),
+    acceleration(0.0f, 0.0f, 0.0f),
+    direction(0.0f),
+    speed(15.0f),
+    brakeForce(10.0f),
+    turnSpeed(90.0f) {} // Adjusted turn speed for more responsive turning
 
 void KartModel::handleInput(GLFWwindow* window, float deltaTime) {
     float radianDirection = glm::radians(direction);
+    glm::vec3 forwardDirection = glm::vec3(sin(radianDirection), 0.0f, cos(radianDirection));
+
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        acceleration += glm::vec3(sin(radianDirection), 0.0f, cos(radianDirection)) * speed * deltaTime;
+        acceleration = forwardDirection * speed;
     }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        acceleration -= glm::vec3(sin(radianDirection), 0.0f, cos(radianDirection)) * brakeForce * deltaTime; // Use brakeForce when 'S' is pressed
+    else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        acceleration = -forwardDirection * brakeForce;
     }
-    
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    else {
+        acceleration = glm::vec3(0.0f, 0.0f, 0.0f);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         direction -= turnSpeed * deltaTime;
     }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
         direction += turnSpeed * deltaTime;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+        position = glm::vec3(3.9f, -0.46f, -1.0f);
+        velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+        acceleration = glm::vec3(0.0f, 0.0f, 0.0f);
+        direction = 0.0f;
     }
 }
 
 void KartModel::update(float deltaTime) {
-    velocity += acceleration * deltaTime; // Update velocity based on acceleration
-    position += velocity * deltaTime;
-    // Add some friction to gradually slow down the kart
+    velocity += acceleration * deltaTime;
+    glm::vec3 newPosition = position + velocity * deltaTime;
+
+    // Ensure the kart stays within bounds
+    if (newPosition.x >= -5.0f && newPosition.x <= 5.0f && newPosition.z >= -5.0f && newPosition.z <= 5.0f) {
+        position = newPosition;
+    }
+
+    // Apply friction
     velocity *= 0.99f;
+
+    // Maintain the kart at a constant height
     position.y = -0.43f;
 }
 
-
 glm::vec3 KartModel::getPosition() const {
     return position;
+}
+
+glm::mat4 KartModel::getModelMatrix() const {
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, position);
+    model = glm::rotate(model, glm::radians(direction), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(0.001f)); // Ajustează scala după necesități
+    return model;
 }

@@ -218,35 +218,6 @@ int main(int argc, char** argv)
 		// Get the new kart position
 		glm::vec3 kartPosition = kart.getPosition();
 
-		/*
-		// Get the current camera position
-		glm::vec3 cameraPosition = pCamera->GetPosition();
-
-		// Calculate the difference between the kart position and the camera position
-		glm::vec3 positionDifference = kartPosition - cameraPosition;
-
-		// Move the camera to match the kart's position
-		// Assuming that your ECameraMovementType enum has FORWARD, BACKWARD, LEFT, and RIGHT values
-		if (positionDifference.x > 0) {
-			pCamera->ProcessKeyboard(ECameraMovementType::RIGHT, positionDifference.x);
-		}
-		else if (positionDifference.x < 0) {
-			pCamera->ProcessKeyboard(ECameraMovementType::LEFT, -positionDifference.x);
-		}
-		if (positionDifference.y > 0) {
-			pCamera->ProcessKeyboard(ECameraMovementType::UP, positionDifference.y);
-		}
-		else if (positionDifference.y < 0) {
-			pCamera->ProcessKeyboard(ECameraMovementType::DOWN, -positionDifference.y);
-		}
-		if (positionDifference.z > 0) {
-			pCamera->ProcessKeyboard(ECameraMovementType::FORWARD, positionDifference.z);
-		}
-		else if (positionDifference.z < 0) {
-			pCamera->ProcessKeyboard(ECameraMovementType::BACKWARD, -positionDifference.z);
-		}
-		*/
-
 		
 		glm::mat4 model = glm::mat4(1.0);
 		shaderFloor.Use();
@@ -261,10 +232,7 @@ int main(int argc, char** argv)
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
-		// Update the kart model matrix with the new position
-		glm::mat4 kartModel = glm::mat4(1.0f);
-		kartModel = glm::translate(kartModel, kartPosition);
-		kartModel = glm::scale(kartModel, glm::vec3(scale));
+		glm::mat4 kartModel = kart.getModelMatrix();
 
 
 

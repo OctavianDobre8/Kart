@@ -1,7 +1,11 @@
 #ifndef KARTMODEL_H
 #define KARTMODEL_H
 
-#include <glm.hpp>
+#define GLM_FORCE_CTOR_INIT 
+#include <GLM.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
+
 #include <glfw3.h>
 
 class KartModel {
@@ -13,7 +17,7 @@ public:
 
     glm::vec3 getPosition() const;
 
-    glm::vec3 getDirection() const;
+    glm::mat4 getModelMatrix() const;
 
 private:
     glm::vec3 position;
