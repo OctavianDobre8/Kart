@@ -24,6 +24,7 @@
 #include "Camera.h"
 #include "Shader.h"
 #include "Model.h"
+#include "KartModel.h"
 
 #pragma comment (lib, "glfw3dll.lib")
 #pragma comment (lib, "glew32.lib")
@@ -94,6 +95,7 @@ int main(int argc, char** argv)
 {
 	std::string strFullExeFileName = argv[0];
 	std::string strExePath;
+	KartModel kart;
 	const size_t last_slash_idx = strFullExeFileName.rfind('\\');
 	if (std::string::npos != last_slash_idx) {
 		strExePath = strFullExeFileName.substr(0, last_slash_idx);
@@ -128,16 +130,16 @@ int main(int argc, char** argv)
 	//glEnable(GL_BLEND);
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// Floor vertices
-	float floorVertices[] = {
-		// positions          // texture Coords 
-		5.0f, -0.5f,  5.0f,  1.0f, 0.0f,
-		-5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
-		-5.0f, -0.5f, -5.0f,  0.0f, 1.0f,
+		// Floor vertices
+		float floorVertices[] = {
+			// positions          // texture Coords 
+			5.0f, -0.5f,  5.0f,  1.0f, 0.0f,
+			-5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
+			-5.0f, -0.5f, -5.0f,  0.0f, 1.0f,
 
-		5.0f, -0.5f,  5.0f,  1.0f, 0.0f,
-		-5.0f, -0.5f, -5.0f,  0.0f, 1.0f,
-		5.0f, -0.5f, -5.0f,  1.0f, 1.0f
+			5.0f, -0.5f,  5.0f,  1.0f, 0.0f,
+			-5.0f, -0.5f, -5.0f,  0.0f, 1.0f,
+			5.0f, -0.5f, -5.0f,  1.0f, 1.0f
 	};
 
 	// Floor VAO si VBO
@@ -190,7 +192,7 @@ int main(int argc, char** argv)
 
 	std::string MarioObjFileName = (currentPath + "\\resources\\models\\Mario\\mario.obj");
 	Model marioObjModel(MarioObjFileName, false);
-
+	
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
 		// per-frame time logic
@@ -207,6 +209,45 @@ int main(int argc, char** argv)
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+		// Handle kart input and update kart state
+		kart.handleInput(window, static_cast<float>(deltaTime));
+		kart.update(static_cast<float>(deltaTime));
+
+
+		// Get the new kart position
+		glm::vec3 kartPosition = kart.getPosition();
+
+		/*
+		// Get the current camera position
+		glm::vec3 cameraPosition = pCamera->GetPosition();
+
+		// Calculate the difference between the kart position and the camera position
+		glm::vec3 positionDifference = kartPosition - cameraPosition;
+
+		// Move the camera to match the kart's position
+		// Assuming that your ECameraMovementType enum has FORWARD, BACKWARD, LEFT, and RIGHT values
+		if (positionDifference.x > 0) {
+			pCamera->ProcessKeyboard(ECameraMovementType::RIGHT, positionDifference.x);
+		}
+		else if (positionDifference.x < 0) {
+			pCamera->ProcessKeyboard(ECameraMovementType::LEFT, -positionDifference.x);
+		}
+		if (positionDifference.y > 0) {
+			pCamera->ProcessKeyboard(ECameraMovementType::UP, positionDifference.y);
+		}
+		else if (positionDifference.y < 0) {
+			pCamera->ProcessKeyboard(ECameraMovementType::DOWN, -positionDifference.y);
+		}
+		if (positionDifference.z > 0) {
+			pCamera->ProcessKeyboard(ECameraMovementType::FORWARD, positionDifference.z);
+		}
+		else if (positionDifference.z < 0) {
+			pCamera->ProcessKeyboard(ECameraMovementType::BACKWARD, -positionDifference.z);
+		}
+		*/
+
+		
 		glm::mat4 model = glm::mat4(1.0);
 		shaderFloor.Use();
 		glm::mat4 projection = pCamera->GetProjectionMatrix();
@@ -219,10 +260,13 @@ int main(int argc, char** argv)
 		shaderFloor.SetMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		// Kart position
+
+		// Update the kart model matrix with the new position
 		glm::mat4 kartModel = glm::mat4(1.0f);
-		kartModel = glm::translate(kartModel, glm::vec3(3.9f, -0.46f, -1.0f));
+		kartModel = glm::translate(kartModel, kartPosition);
 		kartModel = glm::scale(kartModel, glm::vec3(scale));
+
+
 
 		// Kart Texture
 		shaderBlending.Use();
@@ -242,7 +286,7 @@ int main(int argc, char** argv)
 		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
 		lightingShader.SetMat4("model", kartModel);
 		kartObjModel.Draw(lightingShader);
-
+		
 		// Mario position
 		glm::mat4 marioModel = glm::mat4(1.0f);
 		marioModel = glm::translate(marioModel, glm::vec3(4.6f, -0.4f, -1.0f));
@@ -657,9 +701,9 @@ void processInput(GLFWwindow* window)
 		pCamera->ProcessKeyboard(LEFT, (float)deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
 		pCamera->ProcessKeyboard(RIGHT, (float)deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
 		pCamera->ProcessKeyboard(UP, (float)deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
 		pCamera->ProcessKeyboard(DOWN, (float)deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 		pCamera->ProcessKeyboard(ROTATELEFT, (float)deltaTime);
