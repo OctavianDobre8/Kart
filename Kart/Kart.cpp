@@ -63,8 +63,8 @@ float skyboxVertices[] =
 	 1.0f, -1.0f, -1.0f,
 	-1.0f, -1.0f, -1.0f,
 	-1.0f,  1.0f,  1.0f,
-	 1.0f,  1.0f,  1.0f,     
-	 1.0f,  1.0f, -1.0f,    
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f, -1.0f,
 	-1.0f,  1.0f, -1.0f
 };
 
@@ -131,15 +131,15 @@ int main(int argc, char** argv)
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// Floor vertices
-		float floorVertices[] = {
-			// positions          // texture Coords 
-			5.0f, -0.5f,  5.0f,  1.0f, 0.0f,
-			-5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
-			-5.0f, -0.5f, -5.0f,  0.0f, 1.0f,
+	float floorVertices[] = {
+		// positions          // texture Coords 
+		5.0f, -0.5f,  5.0f,  1.0f, 0.0f,
+		-5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
+		-5.0f, -0.5f, -5.0f,  0.0f, 1.0f,
 
-			5.0f, -0.5f,  5.0f,  1.0f, 0.0f,
-			-5.0f, -0.5f, -5.0f,  0.0f, 1.0f,
-			5.0f, -0.5f, -5.0f,  1.0f, 1.0f
+		5.0f, -0.5f,  5.0f,  1.0f, 0.0f,
+		-5.0f, -0.5f, -5.0f,  0.0f, 1.0f,
+		5.0f, -0.5f, -5.0f,  1.0f, 1.0f
 	};
 
 	// Floor VAO si VBO
@@ -192,7 +192,7 @@ int main(int argc, char** argv)
 
 	std::string MarioObjFileName = (currentPath + "\\resources\\models\\Mario\\mario.obj");
 	Model marioObjModel(MarioObjFileName, false);
-	
+
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
 		// per-frame time logic
@@ -200,29 +200,42 @@ int main(int argc, char** argv)
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
-		lightPos.x = 5;
-		lightPos.z = 5;
-
 		// input
 		processInput(window);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
 		// Handle kart input and update kart state
 		kart.handleInput(window, static_cast<float>(deltaTime));
 		kart.update(static_cast<float>(deltaTime));
 
-
-		// Get the new kart position
+		// Get the new kart position and direction
 		glm::vec3 kartPosition = kart.getPosition();
+		float kartDirection = kart.getDirection();
 
-		
-		glm::mat4 model = glm::mat4(1.0);
-		shaderFloor.Use();
+		// Update the camera position to be just behind the kart
+		float distanceBehind = 2.0f; // Adjust this distance as needed
+		glm::vec3 cameraOffset = glm::vec3(-distanceBehind * sin(glm::radians(kartDirection)), 0.5f, -distanceBehind * cos(glm::radians(kartDirection)));
+		glm::vec3 cameraPosition = kartPosition + cameraOffset;
+		pCamera->SetPosition(cameraPosition);
+
+		// Calculate the camera direction based on the kart's direction, ignoring roll
+		glm::vec3 cameraDirection = glm::vec3(sin(glm::radians(kartDirection)), 0.0f, cos(glm::radians(kartDirection)));
+		pCamera->SetDirection(cameraDirection);
+
+		// Render the scene with the updated camera position and direction
 		glm::mat4 projection = pCamera->GetProjectionMatrix();
 		glm::mat4 view = pCamera->GetViewMatrix();
+
+
+
+
+		//Floor
+		glm::mat4 model = glm::mat4(1.0);
+		shaderFloor.Use();
+		//glm::mat4 projection = pCamera->GetProjectionMatrix();
+		//glm::mat4 view = pCamera->GetViewMatrix();
 		shaderFloor.SetMat4("projection", projection);
 		shaderFloor.SetMat4("view", view);
 		// Draw floor
@@ -254,7 +267,7 @@ int main(int argc, char** argv)
 		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
 		lightingShader.SetMat4("model", kartModel);
 		kartObjModel.Draw(lightingShader);
-		
+
 		// Mario position
 		glm::mat4 marioModel = glm::mat4(1.0f);
 		marioModel = glm::translate(marioModel, glm::vec3(4.6f, -0.4f, -1.0f));

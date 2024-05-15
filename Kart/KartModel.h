@@ -19,6 +19,8 @@ public:
 
     glm::mat4 getModelMatrix() const;
 
+    float getDirection() const;
+
 private:
     glm::vec3 position;
     glm::vec3 velocity;

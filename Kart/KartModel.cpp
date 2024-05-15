@@ -1,13 +1,13 @@
 ﻿#include "KartModel.h"
 #include <cmath>
-#include <glm.hpp>
+
 
 KartModel::KartModel()
     : position(3.9f, -0.46f, -1.0f),
     velocity(0.0f, 0.0f, 0.0f),
     acceleration(0.0f, 0.0f, 0.0f),
     direction(0.0f),
-    speed(15.0f),
+    speed(30.0f),
     brakeForce(10.0f),
     turnSpeed(90.0f) {} // Adjusted turn speed for more responsive turning
 
@@ -64,6 +64,10 @@ glm::mat4 KartModel::getModelMatrix() const {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);
     model = glm::rotate(model, glm::radians(direction), glm::vec3(0.0f, 1.0f, 0.0f));
-    model = glm::scale(model, glm::vec3(0.001f)); // Ajustează scala după necesități
+    model = glm::scale(model, glm::vec3(0.001f)); // Adjust scale as needed
     return model;
+}
+
+float KartModel::getDirection() const {
+    return direction;
 }

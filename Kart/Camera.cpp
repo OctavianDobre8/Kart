@@ -164,3 +164,11 @@ Camera::Camera(const int width, const int height, const glm::vec3& position)
 	startPosition = position;
 	Set(width, height, position);
 }
+
+void Camera::SetPosition(const glm::vec3& newPosition) {
+	position = newPosition;
+}
+
+void Camera::SetDirection(const glm::vec3& newDirection) {
+	forward = glm::normalize(newDirection);
+}
