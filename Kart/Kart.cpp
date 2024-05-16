@@ -341,9 +341,8 @@ int main(int argc, char** argv)
 	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
 	std::string backgroundMusic = parentDir + "/resources/sounds/background.wav";
 	std::string startRaceSound = parentDir + "/resources/sounds/start_race.wav";
-	//PlayMusic(backgroundMusic);
-	
-	
+	PlayMusic(backgroundMusic);
+
 	/*
 	Sleep(3500);
 	std::wstring stemp = std::wstring(startRaceSound.begin(), startRaceSound.end());
