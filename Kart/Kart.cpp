@@ -11,8 +11,7 @@ namespace fs = std::experimental::filesystem;
 #include <stdio.h>
 #include <math.h> 
 #include <vector>
-#include <thread>
-#include <chrono>
+
 
 #include <Windows.h>
 #include <mmsystem.h>
@@ -271,7 +270,20 @@ void Night()
 
 
 
+void SetWindowIcon(GLFWwindow* window, const std::string& iconPath)
+{
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load(iconPath.c_str(), &width, &height, &nrChannels, 0);
 
+	if (data) {
+		GLFWimage images[1];
+		images[0].pixels = data;
+		images[0].width = width;
+		images[0].height = height;
+		glfwSetWindowIcon(window, 1, images);
+		stbi_image_free(data); 
+	}
+}
 
 
 int main(int argc, char** argv)
@@ -286,7 +298,7 @@ int main(int argc, char** argv)
 		strExePath = strFullExeFileName.substr(0, last_slash_idx);
 	}
 
-
+	;
 	// glfw: initialize and configure
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -328,7 +340,21 @@ int main(int argc, char** argv)
 
 	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
 	std::string backgroundMusic = parentDir + "/resources/sounds/background.wav";
+	std::string startRaceSound = parentDir + "/resources/sounds/start_race.wav";
+	//PlayMusic(backgroundMusic);
+	
+	
+	/*
+	Sleep(3500);
+	std::wstring stemp = std::wstring(startRaceSound.begin(), startRaceSound.end());
+	LPCWSTR sw = stemp.c_str();
+	PlaySound(sw, NULL, SND_ASYNC);	
 	PlayMusic(backgroundMusic);
+	*/
+
+	std::string iconPath = parentDir + "/resources/images/icon.png";
+	SetWindowIcon(window, iconPath);
+
 
 
 
@@ -448,11 +474,13 @@ int main(int argc, char** argv)
 	Day();
 
 
-
+	
 
 
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
+
+
 		// per-frame time logic
 		double currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
@@ -738,7 +766,7 @@ void processInput(GLFWwindow* window)
 			isFullscreen = false;
 		}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		Sleep(300);
 	}
 }
 
