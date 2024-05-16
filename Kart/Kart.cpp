@@ -49,7 +49,7 @@ namespace fs = std::experimental::filesystem;
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-static bool isNight = false;	
+static bool isNight = false;
 
 Camera* pCamera = nullptr;
 
@@ -71,6 +71,8 @@ unsigned int CreateTexture(const std::string& strTexturePath);
 
 float scale = 0.001f;
 
+
+
 float skyboxVertices[] =
 {
 	//   Coordinates
@@ -83,8 +85,6 @@ float skyboxVertices[] =
 	 100.0f,  100.0f, -100.0f, // Vertex 6: Top-right-back corner
 	-100.0f,  100.0f, -100.0f  // Vertex 7: Top-left-back corner
 };
-
-
 unsigned int skyboxIndices[] =
 {
 	// Right
@@ -108,16 +108,16 @@ unsigned int skyboxIndices[] =
 };
 
 
-void PlayMusic()
+void PlayMusic(std::string path)
 {
-	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
-	std::string soundFile = parentDir + "/resources/sounds/music.wav";
+
+	std::string soundFile = path;
 	std::wstring stemp = std::wstring(soundFile.begin(), soundFile.end());
 	LPCWSTR sw = stemp.c_str();
 
 	PlaySound(sw, NULL, SND_ASYNC | SND_LOOP);
+	std::cout << "Music is playing" << std::endl;
 }
-
 
 void drawObject(glm::vec3 position, glm::vec3 scale, float rotation, Shader& shaderBlending, Shader& lightingShader, Model& objModel, glm::mat4 projection, glm::mat4 view, glm::vec3 lightPos, Camera* pCamera) {
 	// Object position
@@ -171,10 +171,20 @@ void drawObjectWithTexture(glm::vec3 position, glm::vec3 scale, float rotation, 
 	shaderBlending.SetMat4("view", view);
 }
 
+void drawFloor(const glm::mat4& projection, const glm::mat4& view, GLuint floorVAO, GLuint floorTexture, Shader& shaderFloor) {
+	glm::mat4 model = glm::mat4(1.0f);
+	shaderFloor.Use();
+	shaderFloor.SetMat4("projection", projection);
+	shaderFloor.SetMat4("view", view);
+	glBindVertexArray(floorVAO);
+	glBindTexture(GL_TEXTURE_2D, floorTexture);
+	shaderFloor.SetMat4("model", model);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
 
 void Day()
 {
-	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();	
+	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
 
 	std::string facesCubemap[6] =
 	{
@@ -214,7 +224,6 @@ void Day()
 		}
 	}
 }
-
 
 void Night()
 {
@@ -262,9 +271,12 @@ void Night()
 
 
 
+
+
+
 int main(int argc, char** argv)
 {
-	PlayMusic();
+
 
 	std::string strFullExeFileName = argv[0];
 	std::string strExePath;
@@ -315,12 +327,13 @@ int main(int argc, char** argv)
 
 
 	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
+	std::string backgroundMusic = parentDir + "/resources/sounds/background.wav";
+	PlayMusic(backgroundMusic);
 
 
 
-	
 
-	
+
 
 	glEnable(GL_DEPTH_TEST);
 	//glEnable(GL_BLEND);
@@ -412,7 +425,7 @@ int main(int argc, char** argv)
 
 
 	// All the faces of the cubemap (make sure they are in this exact order)
-	
+
 
 
 
@@ -431,7 +444,7 @@ int main(int argc, char** argv)
 	//glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	// Cycles through all the textures and attaches them to the cubemap object
-	
+
 	Day();
 
 
@@ -483,17 +496,7 @@ int main(int argc, char** argv)
 
 
 		//Floor
-		glm::mat4 model = glm::mat4(1.0);
-		shaderFloor.Use();
-		//glm::mat4 projection = pCamera->GetProjectionMatrix();
-		//glm::mat4 view = pCamera->GetViewMatrix();
-		shaderFloor.SetMat4("projection", projection);
-		shaderFloor.SetMat4("view", view);
-		// Draw floor
-		glBindVertexArray(floorVAO);
-		glBindTexture(GL_TEXTURE_2D, floorTexture);
-		shaderFloor.SetMat4("model", model);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		drawFloor(projection, view, floorVAO, floorTexture, shaderFloor);
 
 
 		glm::mat4 kartModel = kart.getModelMatrix();
