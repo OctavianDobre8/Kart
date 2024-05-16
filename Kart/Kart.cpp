@@ -15,6 +15,7 @@ namespace fs = std::experimental::filesystem;
 #include <chrono>
 
 #include <Windows.h>
+#include <mmsystem.h>
 #include <locale>
 #include <codecvt>
 
@@ -42,6 +43,7 @@ namespace fs = std::experimental::filesystem;
 #pragma comment (lib, "glfw3dll.lib")
 #pragma comment (lib, "glew32.lib")
 #pragma comment (lib, "OpenGL32.lib")
+#pragma comment (lib, "winmm.lib")
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -104,6 +106,17 @@ unsigned int skyboxIndices[] =
 	6, 2, 3,
 	3, 7, 6
 };
+
+
+void PlayMusic()
+{
+	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
+	std::string soundFile = parentDir + "/resources/sounds/music.wav";
+	std::wstring stemp = std::wstring(soundFile.begin(), soundFile.end());
+	LPCWSTR sw = stemp.c_str();
+
+	PlaySound(sw, NULL, SND_ASYNC | SND_LOOP);
+}
 
 
 void drawObject(glm::vec3 position, glm::vec3 scale, float rotation, Shader& shaderBlending, Shader& lightingShader, Model& objModel, glm::mat4 projection, glm::mat4 view, glm::vec3 lightPos, Camera* pCamera) {
@@ -251,7 +264,7 @@ void Night()
 
 int main(int argc, char** argv)
 {
-
+	PlayMusic();
 
 	std::string strFullExeFileName = argv[0];
 	std::string strExePath;
@@ -304,6 +317,10 @@ int main(int argc, char** argv)
 	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
 
 
+
+	
+
+	
 
 	glEnable(GL_DEPTH_TEST);
 	//glEnable(GL_BLEND);
@@ -627,9 +644,14 @@ int main(int argc, char** argv)
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+
 	}
 
+
+
 	Cleanup();
+
+
 
 	// Clear floor VAO
 
