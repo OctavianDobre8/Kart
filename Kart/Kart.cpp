@@ -1,4 +1,5 @@
-﻿#include <stdlib.h> 
+﻿#define GLM_FORCE_CTOR_INIT 
+#include <stdlib.h> 
 #include <stdio.h>
 #include <math.h> 
 #include <vector>
@@ -7,9 +8,11 @@
 #include <locale>
 #include <codecvt>
 
+#include <ctime>
+#include <cstdlib>
+
 #include <GL/glew.h>
 
-#define GLM_FORCE_CTOR_INIT 
 #include <GLM.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
@@ -33,6 +36,7 @@
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+
 
 Camera* pCamera = nullptr;
 
@@ -90,9 +94,65 @@ unsigned int skyboxIndices[] =
 	6, 2, 3
 };
 
+void drawObject(glm::vec3 position, glm::vec3 scale, float rotation, Shader& shaderBlending, Shader& lightingShader, Model& objModel, glm::mat4 projection, glm::mat4 view, glm::vec3 lightPos, Camera* pCamera) {
+	// Object position
+	glm::mat4 objModelMat = glm::mat4(1.0f);
+	objModelMat = glm::translate(objModelMat, position);
+	objModelMat = glm::scale(objModelMat, scale);
+	objModelMat = glm::rotate(objModelMat, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+
+	// Object Texture
+	lightingShader.Use();
+	lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
+	lightingShader.SetVec3("lightPos", lightPos);
+	lightingShader.SetVec3("viewPos", pCamera->GetPosition());
+	lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
+	lightingShader.SetMat4("view", pCamera->GetViewMatrix());
+	lightingShader.SetMat4("model", objModelMat);
+
+	objModel.Draw(lightingShader);
+
+	shaderBlending.Use();
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	shaderBlending.SetMat4("projection", projection);
+	shaderBlending.SetMat4("view", view);
+}
+
+void drawObjectWithTexture(glm::vec3 position, glm::vec3 scale, float rotation, GLuint texture, Shader& shaderBlending, Shader& lightingShader, Model& objModel, glm::mat4 projection, glm::mat4 view, glm::vec3 lightPos, Camera* pCamera) {
+	// Object position
+	glm::mat4 objModelMat = glm::mat4(1.0f);
+	objModelMat = glm::translate(objModelMat, position);
+	objModelMat = glm::scale(objModelMat, scale);
+	objModelMat = glm::rotate(objModelMat, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+
+	// Object Texture
+	lightingShader.Use();
+	lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
+	lightingShader.SetVec3("lightPos", lightPos);
+	lightingShader.SetVec3("viewPos", pCamera->GetPosition());
+	lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
+	lightingShader.SetMat4("view", pCamera->GetViewMatrix());
+	lightingShader.SetMat4("model", objModelMat);
+
+	// Bind the texture
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	objModel.Draw(lightingShader);
+
+	shaderBlending.Use();
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	shaderBlending.SetMat4("projection", projection);
+	shaderBlending.SetMat4("view", view);
+}
+
+
+
 
 int main(int argc, char** argv)
 {
+
+
 	std::string strFullExeFileName = argv[0];
 	std::string strExePath;
 	KartModel kart;
@@ -253,411 +313,128 @@ int main(int argc, char** argv)
 
 		glm::mat4 kartModel = kart.getModelMatrix();
 
+		glm::vec3 kartScale = glm::vec3(0.001f);
 
 
-		// Kart Texture
-		shaderBlending.Use();
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
-		shaderBlending.SetMat4("model", kartModel);
-		glBindTexture(GL_TEXTURE_2D, kartTexture);
-
-		glBindVertexArray(floorVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", kartModel);
-		kartObjModel.Draw(lightingShader);
-
-		// Mario position
-		glm::mat4 marioModel = glm::mat4(1.0f);
-		marioModel = glm::translate(marioModel, glm::vec3(4.6f, -0.4f, -1.0f));
-		marioModel = glm::scale(marioModel, glm::vec3(0.005f));
-
-		// Mario Texture
-		shaderBlending.Use();
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
-		shaderBlending.SetMat4("model", marioModel);
-
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", marioModel);
-		marioObjModel.Draw(lightingShader);
-
-		// Tree1 position
-		glm::mat4 treeModel1 = glm::mat4(1.0f);
-		treeModel1 = glm::translate(treeModel1, glm::vec3(3.0f, -0.46f, -1.0f));
-		treeModel1 = glm::scale(treeModel1, glm::vec3(0.005f));
-
-		// Tree1 Texture
-		shaderBlending.Use();
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
-		shaderBlending.SetMat4("model", treeModel1);
-		glBindTexture(GL_TEXTURE_2D, treeTexture);
-
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", treeModel1);
-		treeObjModel.Draw(lightingShader);
-
-		// Tree2 position
-		glm::mat4 treeModel2 = glm::mat4(1.0f);
-		treeModel2 = glm::translate(treeModel2, glm::vec3(-0.5f, -0.46f, -2.0f));
-		treeModel2 = glm::scale(treeModel2, glm::vec3(0.005f));
-
-		// Tree2 Texture
-		shaderBlending.Use();
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
-		shaderBlending.SetMat4("model", treeModel2);
-		glBindTexture(GL_TEXTURE_2D, treeTexture);
-
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", treeModel2);
-		treeObjModel.Draw(lightingShader);
-
-		// Tree3 position
-		glm::mat4 treeModel3 = glm::mat4(1.0f);
-		treeModel3 = glm::translate(treeModel3, glm::vec3(4.5f, -0.46f, 4.5f));
-		treeModel3 = glm::scale(treeModel3, glm::vec3(0.005f));
-
-		// Tree3 Texture
-		shaderBlending.Use();
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
-		shaderBlending.SetMat4("model", treeModel3);
-		glBindTexture(GL_TEXTURE_2D, treeTexture);
-
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", treeModel3);
-		treeObjModel.Draw(lightingShader);
-
-		// Tree4 position
-		glm::mat4 treeModel4 = glm::mat4(1.0f);
-		treeModel4 = glm::translate(treeModel4, glm::vec3(4.5f, -0.46f, -4.5f));
-		treeModel4 = glm::scale(treeModel4, glm::vec3(0.005f));
-
-		// Tree4 Texture
-		shaderBlending.Use();
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
-		shaderBlending.SetMat4("model", treeModel4);
-		glBindTexture(GL_TEXTURE_2D, treeTexture);
-
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", treeModel4);
-		treeObjModel.Draw(lightingShader);
-
-		// Tree5 position
-		glm::mat4 treeModel5 = glm::mat4(1.0f);
-		treeModel5 = glm::translate(treeModel5, glm::vec3(-3.5f, -0.46f, 4.2f));
-		treeModel5 = glm::scale(treeModel5, glm::vec3(0.005f));
-
-		// Tree5 Texture
-		shaderBlending.Use();
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
-		shaderBlending.SetMat4("model", treeModel5);
-		glBindTexture(GL_TEXTURE_2D, treeTexture);
-
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", treeModel5);
-		treeObjModel.Draw(lightingShader);
-
-		// Tree6 position
-		glm::mat4 treeModel6 = glm::mat4(1.0f);
-		treeModel6 = glm::translate(treeModel6, glm::vec3(-4.2f, -0.46f, 3.0f));
-		treeModel6 = glm::scale(treeModel6, glm::vec3(0.005f));
-
-		// Tree6 Texture
-		shaderBlending.Use();
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
-		shaderBlending.SetMat4("model", treeModel6);
-		glBindTexture(GL_TEXTURE_2D, treeTexture);
-
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", treeModel6);
-		treeObjModel.Draw(lightingShader);
-
-		shaderBlending.Use();
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
-
-		// Tree7 position
-		glm::mat4 treeModel7 = glm::mat4(1.0f);
-		treeModel7 = glm::translate(treeModel7, glm::vec3(-4.2f, -0.46f, -3.0f));
-		treeModel7 = glm::scale(treeModel7, glm::vec3(0.005f));
-
-		// Tree7 Texture
-		shaderBlending.Use();
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
-		shaderBlending.SetMat4("model", treeModel7);
-		glBindTexture(GL_TEXTURE_2D, treeTexture);
-
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", treeModel7);
-		treeObjModel.Draw(lightingShader);
-
-		shaderBlending.Use();
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
-
-		// Bush1 position
-		glm::mat4 bushModel1 = glm::mat4(1.0f);
-		bushModel1 = glm::translate(bushModel1, glm::vec3(-4.5f, -0.50f, -4.4f));
-		bushModel1 = glm::scale(bushModel1, glm::vec3(0.009f));
-		bushModel1 = glm::rotate(bushModel1, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-		// Bush1 Texture
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", bushModel1);
-		bushObjModel.Draw(lightingShader);
-
-		shaderBlending.Use();
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
-
-		// Bush2 position
-		glm::mat4 bushModel2 = glm::mat4(1.0f);
-		bushModel2 = glm::translate(bushModel2, glm::vec3(-1.7f, -0.50f, 3.2f));
-		bushModel2 = glm::scale(bushModel2, glm::vec3(0.009f));
-
-		// Bush2 Texture
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", bushModel2);
-		bushObjModel.Draw(lightingShader);
-
-		shaderBlending.Use();
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
-
-		// Bush3 position
-		glm::mat4 bushModel3 = glm::mat4(1.0f);
-		bushModel3 = glm::translate(bushModel3, glm::vec3(1.0f, -0.50f, -4.0f));
-		bushModel3 = glm::scale(bushModel3, glm::vec3(0.009f));
-		bushModel3 = glm::rotate(bushModel3, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-		// Bush3 Texture
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", bushModel3);
-		bushObjModel.Draw(lightingShader);
-
-		// Bush4 position
-		glm::mat4 bushModel4 = glm::mat4(1.0f);
-		bushModel4 = glm::translate(bushModel4, glm::vec3(2.0f, -0.50f, -4.3f));
-		bushModel4 = glm::scale(bushModel4, glm::vec3(0.009f));
-		bushModel4 = glm::rotate(bushModel4, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-		// Bush4 Texture
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", bushModel4);
-		bushObjModel.Draw(lightingShader);
-
-		shaderBlending.Use();
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
-
-		// Bush5 position
-		glm::mat4 bushModel5 = glm::mat4(1.0f);
-		bushModel5 = glm::translate(bushModel5, glm::vec3(-0.4f, -0.50f, 2.8f));
-		bushModel5 = glm::scale(bushModel5, glm::vec3(0.009f));
-		bushModel5 = glm::rotate(bushModel5, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-		// Bush5 Texture
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", bushModel5);
-		bushObjModel.Draw(lightingShader);
-
-		shaderBlending.Use();
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
+		// Models
 
 
-		// Bush6 position
-		glm::mat4 bushModel6 = glm::mat4(1.0f);
-		bushModel6 = glm::translate(bushModel6, glm::vec3(-4.3f, -0.50f, 4.2f));
-		bushModel6 = glm::scale(bushModel6, glm::vec3(0.009f));
+		// Kart
+		drawObjectWithTexture(kartPosition, kartScale, kartDirection, kartTexture, shaderBlending, lightingShader, kartObjModel, projection, view, lightPos, pCamera);
 
-		// Bush6 Texture
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", bushModel6);
-		bushObjModel.Draw(lightingShader);
+		// Mario
+		glm::vec3 marioPosition = glm::vec3(4.6f, -0.4f, -1.0f);
+		glm::vec3 marioScale = glm::vec3(0.005f);
+		float marioRotation = 0.0f;
 
-		shaderBlending.Use();
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
+		drawObject(marioPosition, marioScale, marioRotation, shaderBlending, lightingShader, marioObjModel, projection, view, lightPos, pCamera);
 
-		// Bush7 position
-		glm::mat4 bushModel7 = glm::mat4(1.0f);
-		bushModel7 = glm::translate(bushModel7, glm::vec3(-3.5f, -0.50f, 2.5f));
-		bushModel7 = glm::scale(bushModel7, glm::vec3(0.009f));
 
-		// Bush7 Texture
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", bushModel7);
-		bushObjModel.Draw(lightingShader);
+		// Trees
 
-		shaderBlending.Use();
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
+		// Universal tree related
+		glm::vec3 treeScale = glm::vec3(0.005f);
+		float treeRotation = 0.0f;
 
-		// Bush8 position
-		glm::mat4 bushModel8 = glm::mat4(1.0f);
-		bushModel8 = glm::translate(bushModel8, glm::vec3(-2.5f, -0.50f, 4.4f));
-		bushModel8 = glm::scale(bushModel8, glm::vec3(0.009f));
 
-		// Bush8 Texture
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", bushModel8);
-		bushObjModel.Draw(lightingShader);
+		// Tree1 	
+		glm::vec3 treePosition = glm::vec3(3.0f, -0.46f, -1.0f);
+		drawObjectWithTexture(treePosition, treeScale, treeRotation, treeTexture, shaderBlending, lightingShader, treeObjModel, projection, view, lightPos, pCamera);
 
-		// Goomba1 position
-		glm::mat4 goombaModel1 = glm::mat4(1.0f);
-		goombaModel1 = glm::translate(goombaModel1, glm::vec3(-2.0f, -0.50f, 4.6f));
-		goombaModel1 = glm::scale(goombaModel1, glm::vec3(0.002f));
-		goombaModel1 = glm::rotate(goombaModel1, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		// Tree2
+		glm::vec3 tree2Position = glm::vec3(-0.5f, -0.46f, -2.0f);
+		drawObjectWithTexture(tree2Position, treeScale, treeRotation, treeTexture, shaderBlending, lightingShader, treeObjModel, projection, view, lightPos, pCamera);
 
-		// Goomba1 Texture
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", goombaModel1);
-		goombaObjModel.Draw(lightingShader);
+		// Tree3
+		glm::vec3 treePosition3 = glm::vec3(4.5f, -0.46f, 4.5f);
+		drawObjectWithTexture(treePosition3, treeScale, treeRotation, treeTexture, shaderBlending, lightingShader, treeObjModel, projection, view, lightPos, pCamera);
 
-		// Goomba2 position
-		glm::mat4 goombaModel2 = glm::mat4(1.0f);
-		goombaModel2 = glm::translate(goombaModel2, glm::vec3(-3.7f, -0.50f, 3.6f));
-		goombaModel2 = glm::scale(goombaModel2, glm::vec3(0.002f));
-		goombaModel2 = glm::rotate(goombaModel2, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		// Tree4
+		glm::vec3 treePosition4 = glm::vec3(4.5f, -0.46f, -4.5f);
+		drawObjectWithTexture(treePosition4, treeScale, treeRotation, treeTexture, shaderBlending, lightingShader, treeObjModel, projection, view, lightPos, pCamera);
 
-		// Goomba2 Texture
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", goombaModel2);
-		goombaObjModel.Draw(lightingShader);
+		// Tree5
+		glm::vec3 treePosition5 = glm::vec3(-3.5f, -0.46f, 4.2f);
+		drawObjectWithTexture(treePosition5, treeScale, treeRotation, treeTexture, shaderBlending, lightingShader, treeObjModel, projection, view, lightPos, pCamera);
 
-		// Goomba3 position
-		glm::mat4 goombaModel3 = glm::mat4(1.0f);
-		goombaModel3 = glm::translate(goombaModel3, glm::vec3(-4.0f, -0.50f, 2.0f));
-		goombaModel3 = glm::scale(goombaModel3, glm::vec3(0.002f));
-		goombaModel3 = glm::rotate(goombaModel3, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		// Tree6
+		glm::vec3 treePosition6 = glm::vec3(-4.2f, -0.46f, 3.0f);
+		drawObjectWithTexture(treePosition6, treeScale, treeRotation, treeTexture, shaderBlending, lightingShader, treeObjModel, projection, view, lightPos, pCamera);
 
-		// Goomba3 Texture
-		lightingShader.Use();
-		lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
-		lightingShader.SetMat4("model", goombaModel3);
-		goombaObjModel.Draw(lightingShader);
+		// Tree7
+		glm::vec3 treePosition7 = glm::vec3(-4.2f, -0.46f, -3.0f);
+		drawObjectWithTexture(treePosition7, treeScale, treeRotation, treeTexture, shaderBlending, lightingShader, treeObjModel, projection, view, lightPos, pCamera);
 
-		shaderBlending.Use();
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		shaderBlending.SetMat4("projection", projection);
-		shaderBlending.SetMat4("view", view);
+
+
+		// Bushes
+
+		// Universal bush related	
+		glm::vec3 bushScale = glm::vec3(0.009f);
+		float bushRotation = 0.0f;
+
+
+		// Bush1
+		glm::vec3 bushPosition1 = glm::vec3(-4.5f, -0.50f, -4.4f);
+		drawObject(bushPosition1, bushScale, bushRotation, shaderBlending, lightingShader, bushObjModel, projection, view, lightPos, pCamera);
+
+
+		// Bush2
+		glm::vec3 bushPosition2 = glm::vec3(-1.7f, -0.50f, 3.2f);
+		drawObject(bushPosition2, bushScale, bushRotation, shaderBlending, lightingShader, bushObjModel, projection, view, lightPos, pCamera);
+
+		// Bush3
+		glm::vec3 bushPosition3 = glm::vec3(1.0f, -0.50f, -4.0f);
+		drawObject(bushPosition3, bushScale, bushRotation, shaderBlending, lightingShader, bushObjModel, projection, view, lightPos, pCamera);
+
+
+
+		// Bush4
+		glm::vec3 bushPosition4 = glm::vec3(2.0f, -0.50f, -4.3f);
+		drawObject(bushPosition4, bushScale, bushRotation, shaderBlending, lightingShader, bushObjModel, projection, view, lightPos, pCamera);
+
+
+		// Bush5
+		glm::vec3 bushPosition5 = glm::vec3(-0.4f, -0.50f, 2.8f);
+		drawObject(bushPosition5, bushScale, bushRotation, shaderBlending, lightingShader, bushObjModel, projection, view, lightPos, pCamera);
+
+
+		// Bush 6
+		glm::vec3 bushPosition6 = glm::vec3(-4.3f, -0.50f, 4.2f);
+		drawObject(bushPosition6, bushScale, bushRotation, shaderBlending, lightingShader, bushObjModel, projection, view, lightPos, pCamera);
+
+
+		// Bush 7
+		glm::vec3 bushPosition7 = glm::vec3(-3.5f, -0.50f, 2.5f);
+		drawObject(bushPosition7, bushScale, bushRotation, shaderBlending, lightingShader, bushObjModel, projection, view, lightPos, pCamera);
+
+		// Bush 8
+		glm::vec3 bushPosition8 = glm::vec3(-2.5f, -0.50f, 4.4f);
+		drawObject(bushPosition8, bushScale, bushRotation, shaderBlending, lightingShader, bushObjModel, projection, view, lightPos, pCamera);
+
+		
+
+
+
+		// Universal goomba related
+		glm::vec3 goombaScale = glm::vec3(0.002f);
+		float goombaRotation = 90.0f;
+
+
+		
+		// Goomba1
+		glm::vec3 goombaPosition1 = glm::vec3(-2.0f, -0.50f, 4.6f);
+		drawObject(goombaPosition1, goombaScale, goombaRotation, shaderBlending, lightingShader, goombaObjModel, projection, view, lightPos, pCamera);
+
+		// Goomba2
+		glm::vec3 goombaPosition2 = glm::vec3(-3.7f, -0.50f, 3.6f);
+		drawObject(goombaPosition2, goombaScale, goombaRotation, shaderBlending, lightingShader, goombaObjModel, projection, view, lightPos, pCamera);
+
+		// Goomba3
+		glm::vec3 goombaPosition3 = glm::vec3(-4.0f, -0.50f, 2.0f);
+		drawObject(goombaPosition3, goombaScale, goombaRotation, shaderBlending, lightingShader, goombaObjModel, projection, view, lightPos, pCamera);
+
+
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
