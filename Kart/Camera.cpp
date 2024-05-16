@@ -17,18 +17,23 @@ void Camera::ProcessMouseMovement(float xOffset, float yOffset, bool constrainPi
 	yaw += xOffset;
 	pitch += yOffset;
 
-	//std::cout << "yaw = " << yaw << std::endl;
-	//std::cout << "pitch = " << pitch << std::endl;
-
-	// Avem grijã sã nu ne dãm peste cap
+	// Constrain yaw to the range [-25.0f, 25.0f]
 	if (constrainPitch) {
-		if (pitch > 89.0f)
-			pitch = 89.0f;
-		if (pitch < -89.0f)
-			pitch = -89.0f;
+		if (yaw > 25.0f)
+			yaw = 25.0f;
+		if (yaw < -25.0f)
+			yaw = -25.0f;
 	}
 
-	// Se modificã vectorii camerei pe baza unghiurilor Euler
+	// Constrain pitch to the range [-25.0f, 25.0f]
+	if (constrainPitch) {
+		if (pitch > 25.0f)
+			pitch = 25.0f;
+		if (pitch < -25.0f)
+			pitch = -25.0f;
+	}
+
+	// Update camera vectors based on Euler angles
 	UpdateCameraVectors();
 }
 
