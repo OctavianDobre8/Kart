@@ -1,8 +1,18 @@
 ﻿#define GLM_FORCE_CTOR_INIT 
+#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
+
+// for easier usage
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+
+
+
 #include <stdlib.h> 
 #include <stdio.h>
 #include <math.h> 
 #include <vector>
+#include <thread>
+#include <chrono>
 
 #include <Windows.h>
 #include <locale>
@@ -37,6 +47,7 @@
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+static bool isNight = false;	
 
 Camera* pCamera = nullptr;
 
@@ -58,41 +69,42 @@ unsigned int CreateTexture(const std::string& strTexturePath);
 
 float scale = 0.001f;
 
-
 float skyboxVertices[] =
 {
 	//   Coordinates
-	-1.0f, -1.0f,  1.0f,
-	 1.0f, -1.0f,  1.0f,
-	 1.0f, -1.0f, -1.0f,
-	-1.0f, -1.0f, -1.0f,
-	-1.0f,  1.0f,  1.0f,
-	 1.0f,  1.0f,  1.0f,
-	 1.0f,  1.0f, -1.0f,
-	-1.0f,  1.0f, -1.0f
+	-100.0f, -100.0f,  100.0f, // Vertex 0: Bottom-left-front corner
+	 100.0f, -100.0f,  100.0f, // Vertex 1: Bottom-right-front corner
+	 100.0f, -100.0f, -100.0f, // Vertex 2: Bottom-right-back corner
+	-100.0f, -100.0f, -100.0f, // Vertex 3: Bottom-left-back corner
+	-100.0f,  100.0f,  100.0f, // Vertex 4: Top-left-front corner
+	 100.0f,  100.0f,  100.0f, // Vertex 5: Top-right-front corner
+	 100.0f,  100.0f, -100.0f, // Vertex 6: Top-right-back corner
+	-100.0f,  100.0f, -100.0f  // Vertex 7: Top-left-back corner
 };
+
 
 unsigned int skyboxIndices[] =
 {
 	// Right
-	1, 2, 6,
 	6, 5, 1,
+	1, 2, 6,
 	// Left
-	0, 4, 7,
 	7, 3, 0,
+	0, 4, 7,
 	// Top
-	4, 5, 6,
 	6, 7, 4,
+	4, 5, 6,
 	// Bottom
-	0, 3, 2,
 	2, 1, 0,
+	0, 3, 2,
 	// Back
-	0, 1, 5,
 	5, 4, 0,
+	0, 1, 5,
 	// Front
-	3, 7, 6,
-	6, 2, 3
+	6, 2, 3,
+	3, 7, 6
 };
+
 
 void drawObject(glm::vec3 position, glm::vec3 scale, float rotation, Shader& shaderBlending, Shader& lightingShader, Model& objModel, glm::mat4 projection, glm::mat4 view, glm::vec3 lightPos, Camera* pCamera) {
 	// Object position
@@ -147,6 +159,94 @@ void drawObjectWithTexture(glm::vec3 position, glm::vec3 scale, float rotation, 
 }
 
 
+void Day()
+{
+	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();	
+
+	std::string facesCubemap[6] =
+	{
+		parentDir + "/resources/skybox/right (1).jpg",
+		parentDir + "/resources/skybox/left (1).jpg",
+		parentDir + "/resources/skybox/top (1).jpg",
+		parentDir + "/resources/skybox/bottom (1).jpg",
+		parentDir + "/resources/skybox/front (1).jpg",
+		parentDir + "/resources/skybox/back (1).jpg"
+	};
+
+	for (unsigned int i = 0; i < 6; i++)
+	{
+		int width, height, nrChannels;
+		unsigned char* data = stbi_load(facesCubemap[i].c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			stbi_set_flip_vertically_on_load(false);
+			glTexImage2D
+			(
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0,
+				GL_RGB,
+				width,
+				height,
+				0,
+				GL_RGB,
+				GL_UNSIGNED_BYTE,
+				data
+			);
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Failed to load texture: " << facesCubemap[i] << std::endl;
+			stbi_image_free(data);
+		}
+	}
+}
+
+
+void Night()
+{
+	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
+
+	std::string facesCubemapNight[6] =
+	{
+		parentDir + "/resources/skybox/right1.jpg",
+		parentDir + "/resources/skybox/left1.jpg",
+		parentDir + "/resources/skybox/top1.jpg",
+		parentDir + "/resources/skybox/bottom1.jpg",
+		parentDir + "/resources/skybox/front1.jpg",
+		parentDir + "/resources/skybox/back1.jpg"
+
+	};
+
+	for (unsigned int i = 0; i < 6; i++)
+	{
+		int width, height, nrChannels;
+		unsigned char* data = stbi_load(facesCubemapNight[i].c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			stbi_set_flip_vertically_on_load(false);
+			glTexImage2D
+			(
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0,
+				GL_RGB,
+				width,
+				height,
+				0,
+				GL_RGB,
+				GL_UNSIGNED_BYTE,
+				data
+			);
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Failed to load texture: " << facesCubemapNight[i] << std::endl;
+			stbi_image_free(data);
+		}
+	}
+}
+
 
 
 int main(int argc, char** argv)
@@ -186,6 +286,25 @@ int main(int argc, char** argv)
 
 	glewInit();
 
+
+	// Generates Shader objects
+	Shader shaderProgram("Blending.vs", "Blending.fs");
+	Shader skyboxShader("Skybox.vs", "Skybox.fs");
+
+	// Take care of all the light related things
+	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	glm::vec3 lightPos(0.0f, 3.0f, 1.0f);
+	shaderProgram.Use();
+	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
+	skyboxShader.Use();
+	glUniform1i(glGetUniformLocation(skyboxShader.ID, "skybox"), 0);
+
+
+	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
+
+
+
 	glEnable(GL_DEPTH_TEST);
 	//glEnable(GL_BLEND);
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -222,7 +341,6 @@ int main(int argc, char** argv)
 	// Create camera
 	pCamera = new Camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0, 0.0, 3.0));
 
-	glm::vec3 lightPos(0.0f, 3.0f, 1.0f);
 
 	wchar_t buffer[MAX_PATH];
 	GetCurrentDirectoryW(MAX_PATH, buffer);
@@ -252,6 +370,56 @@ int main(int argc, char** argv)
 
 	std::string MarioObjFileName = (currentPath + "\\resources\\models\\Mario\\mario.obj");
 	Model marioObjModel(MarioObjFileName, false);
+
+
+
+
+
+
+
+	// Create VAO, VBO, and EBO for the skybox
+	unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glGenBuffers(1, &skyboxEBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(skyboxIndices), &skyboxIndices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
+	// All the faces of the cubemap (make sure they are in this exact order)
+	
+
+
+
+
+	// Creates the cubemap texture object
+	unsigned int cubemapTexture;
+	glGenTextures(1, &cubemapTexture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	// These are very important to prevent seams
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	// This might help with seams on some systems
+	//glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+	// Cycles through all the textures and attaches them to the cubemap object
+	
+	Day();
+
+
+
+
 
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -412,7 +580,7 @@ int main(int argc, char** argv)
 		glm::vec3 bushPosition8 = glm::vec3(-2.5f, -0.50f, 4.4f);
 		drawObject(bushPosition8, bushScale, bushRotation, shaderBlending, lightingShader, bushObjModel, projection, view, lightPos, pCamera);
 
-		
+
 
 
 
@@ -421,7 +589,7 @@ int main(int argc, char** argv)
 		float goombaRotation = 90.0f;
 
 
-		
+
 		// Goomba1
 		glm::vec3 goombaPosition1 = glm::vec3(-2.0f, -0.50f, 4.6f);
 		drawObject(goombaPosition1, goombaScale, goombaRotation, shaderBlending, lightingShader, goombaObjModel, projection, view, lightPos, pCamera);
@@ -434,7 +602,27 @@ int main(int argc, char** argv)
 		glm::vec3 goombaPosition3 = glm::vec3(-4.0f, -0.50f, 2.0f);
 		drawObject(goombaPosition3, goombaScale, goombaRotation, shaderBlending, lightingShader, goombaObjModel, projection, view, lightPos, pCamera);
 
+		// Since the cubemap will always have a depth of 1.0, we need that equal sign so it doesn't get discarded
+		glDepthFunc(GL_LEQUAL);
 
+		skyboxShader.Use();
+
+		// We make the mat4 into a mat3 and then a mat4 again in order to get rid of the last row and column
+		// The last row and column affect the translation of the skybox (which we don't want to affect)
+		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
+		glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+		// Draws the cubemap as the last object so we can save a bit of performance by discarding all fragments
+		// where an object is present (a depth of 1.0f will always fail against any object's depth value)
+		glBindVertexArray(skyboxVAO);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+
+		// Switch back to the normal depth function
+		glDepthFunc(GL_LESS);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
@@ -479,6 +667,53 @@ void processInput(GLFWwindow* window)
 		glfwGetWindowSize(window, &width, &height);
 		pCamera->Reset(width, height);
 
+	}
+
+
+	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
+	{
+		isNight = !isNight; // Toggle state
+
+		if (isNight)
+		{
+			Night();
+		}
+		else
+		{
+			Day();
+		}
+	}
+
+
+	if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS)
+	{
+		static int savedWidth = 0, savedHeight = 0, savedPosX = 0, savedPosY = 0;
+		static bool isFullscreen = false;
+
+		if (!isFullscreen)
+		{
+			// Save the current window size and position
+			glfwGetWindowSize(window, &savedWidth, &savedHeight);
+			glfwGetWindowPos(window, &savedPosX, &savedPosY);
+
+			// Get the monitor and its video mode
+			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+			// Set the window to fullscreen
+			glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+
+			isFullscreen = true;
+		}
+		else
+		{
+			// Restore the window's original size and position
+			glfwSetWindowMonitor(window, NULL, savedPosX, savedPosY, savedWidth, savedHeight, 0);
+
+			isFullscreen = false;
+		}
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 }
 
