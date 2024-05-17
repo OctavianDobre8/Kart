@@ -19,18 +19,18 @@ void Camera::ProcessMouseMovement(float xOffset, float yOffset, bool constrainPi
 
 	// Constrain yaw to the range [-25.0f, 25.0f]
 	if (constrainPitch) {
-		if (yaw > 25.0f)
-			yaw = 25.0f;
-		if (yaw < -25.0f)
-			yaw = -25.0f;
+		if (yaw > 5.0f)
+			yaw = 5.0f;
+		if (yaw < -5.0f)
+			yaw = -5.0f;
 	}
 
 	// Constrain pitch to the range [-25.0f, 25.0f]
 	if (constrainPitch) {
-		if (pitch > 25.0f)
-			pitch = 25.0f;
-		if (pitch < -25.0f)
-			pitch = -25.0f;
+		if (pitch > 5.0f)
+			pitch = 5.0f;
+		if (pitch < -5.0f)
+			pitch = -5.0f;
 	}
 
 	// Update camera vectors based on Euler angles

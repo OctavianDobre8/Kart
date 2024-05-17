@@ -48,7 +48,13 @@ namespace fs = std::experimental::filesystem;
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+
+
 static bool isNight = false;
+static bool isMusicOn = true;
+static bool wasMPressed = false;
+
+
 
 Camera* pCamera = nullptr;
 
@@ -115,7 +121,6 @@ void PlayMusic(std::string path)
 	LPCWSTR sw = stemp.c_str();
 
 	PlaySound(sw, NULL, SND_ASYNC | SND_LOOP);
-	std::cout << "Music is playing" << std::endl;
 }
 
 void drawObject(glm::vec3 position, glm::vec3 scale, float rotation, Shader& shaderBlending, Shader& lightingShader, Model& objModel, glm::mat4 projection, glm::mat4 view, glm::vec3 lightPos, Camera* pCamera) {
@@ -267,8 +272,6 @@ void Night()
 		}
 	}
 }
-
-
 
 void SetWindowIcon(GLFWwindow* window, const std::string& iconPath)
 {
@@ -766,6 +769,31 @@ void processInput(GLFWwindow* window)
 		}
 
 		Sleep(300);
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
+	{
+		if (!wasMPressed)
+		{
+			std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
+			std::string backgroundMusic = parentDir + "/resources/sounds/background.wav";
+			if (isMusicOn)
+			{
+				PlayMusic(backgroundMusic);
+				std::cout << "Music is playing" << std::endl;
+			}
+			else
+			{
+				PlaySound(NULL, NULL, 0);
+				std::cout << "Music is stopped" << std::endl;
+			}
+			isMusicOn = !isMusicOn;
+		}
+		wasMPressed = true;
+	}
+	else
+	{
+		wasMPressed = false; 
 	}
 }
 
