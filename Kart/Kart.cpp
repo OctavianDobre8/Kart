@@ -123,6 +123,31 @@ void PlayMusic(std::string path)
 	PlaySound(sw, NULL, SND_ASYNC | SND_LOOP);
 }
 
+void UpdateLightingShader(bool isNight, Shader& lightingShader)
+{
+
+	float dayAmbientIntensity = 0.2f;
+	float nightAmbientIntensity = 0.1f;
+
+	float dayDiffuseIntensity = 0.5f;
+	float nightDiffuseIntensity = 0.2f;
+
+	float daySpecularIntensity = 0.3f;
+	float nightSpecularIntensity = 0.1f;
+
+	lightingShader.Use();
+	if (isNight) {
+		lightingShader.SetFloat("ambientIntensity", nightAmbientIntensity);
+		lightingShader.SetFloat("diffuseIntensity", nightDiffuseIntensity);
+		lightingShader.SetFloat("specularIntensity", nightSpecularIntensity);
+	}
+	else {
+		lightingShader.SetFloat("ambientIntensity", dayAmbientIntensity);
+		lightingShader.SetFloat("diffuseIntensity", dayDiffuseIntensity);
+		lightingShader.SetFloat("specularIntensity", daySpecularIntensity);
+	}
+}
+
 void drawObject(glm::vec3 position, glm::vec3 scale, float rotation, Shader& shaderBlending, Shader& lightingShader, Model& objModel, glm::mat4 projection, glm::mat4 view, glm::vec3 lightPos, Camera* pCamera) {
 	// Object position
 	glm::mat4 objModelMat = glm::mat4(1.0f);
@@ -333,7 +358,7 @@ int main(int argc, char** argv)
 
 	// Take care of all the light related things
 	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	glm::vec3 lightPos(0.0f, 3.0f, 1.0f);
+	glm::vec3 lightPos(0.0f, 10.0f, 0.0f);
 	shaderProgram.Use();
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
@@ -392,7 +417,8 @@ int main(int argc, char** argv)
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
 	// Textures
-	unsigned int floorTexture = CreateTexture(strExePath + "\\Map.jpg");
+	unsigned int floorTextureDay = CreateTexture(strExePath + "\\Map.jpg");
+	unsigned int floorTextureNight = CreateTexture(strExePath + "\\MapNight.jpg");
 	unsigned int kartTexture = CreateTexture(strExePath + "\\Kart.jpg");
 	unsigned int treeTexture = CreateTexture(strExePath + "\\Tree.PNG");
 
@@ -523,10 +549,10 @@ int main(int argc, char** argv)
 		glm::mat4 projection = pCamera->GetProjectionMatrix();
 		glm::mat4 view = pCamera->GetViewMatrix();
 
-
+		UpdateLightingShader(isNight, lightingShader);
 
 		//Floor
-		drawFloor(projection, view, floorVAO, floorTexture, shaderFloor);
+		drawFloor(projection, view, floorVAO, isNight ? floorTextureNight : floorTextureDay, shaderFloor);
 
 
 		glm::mat4 kartModel = kart.getModelMatrix();
