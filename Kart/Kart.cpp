@@ -217,12 +217,12 @@ void Day()
 
 	std::string facesCubemap[6] =
 	{
-		parentDir + "/resources/skybox/right (1).jpg",
-		parentDir + "/resources/skybox/left (1).jpg",
-		parentDir + "/resources/skybox/top (1).jpg",
-		parentDir + "/resources/skybox/bottom (1).jpg",
-		parentDir + "/resources/skybox/front (1).jpg",
-		parentDir + "/resources/skybox/back (1).jpg"
+		parentDir + "/resources/skybox/right (1).jpg", 
+		parentDir + "/resources/skybox/left (1).jpg", 
+		parentDir + "/resources/skybox/top (1).jpg", 
+		parentDir + "/resources/skybox/bottom (1).jpg", 
+		parentDir + "/resources/skybox/front (1).jpg", 
+		parentDir + "/resources/skybox/back (1).jpg" 
 	};
 
 	for (unsigned int i = 0; i < 6; i++)
@@ -262,8 +262,8 @@ void Night()
 	{
 		parentDir + "/resources/skybox/right1.jpg",
 		parentDir + "/resources/skybox/left1.jpg",
-		parentDir + "/resources/skybox/top1.jpg",
 		parentDir + "/resources/skybox/bottom1.jpg",
+		parentDir + "/resources/skybox/top1.jpg",
 		parentDir + "/resources/skybox/front1.jpg",
 		parentDir + "/resources/skybox/back1.jpg"
 
