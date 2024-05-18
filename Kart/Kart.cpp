@@ -51,7 +51,7 @@ const unsigned int SCR_HEIGHT = 600;
 
 
 static bool isNight = false;
-static bool isMusicOn = true;
+static bool isMusicOn = false;
 static bool wasMPressed = false;
 
 
@@ -317,6 +317,7 @@ void SetWindowIcon(GLFWwindow* window, const std::string& iconPath)
 int main(int argc, char** argv)
 {
 
+	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
 
 	std::string strFullExeFileName = argv[0];
 	std::string strExePath;
@@ -365,8 +366,6 @@ int main(int argc, char** argv)
 	skyboxShader.Use();
 	glUniform1i(glGetUniformLocation(skyboxShader.ID, "skybox"), 0);
 
-
-	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
 	std::string backgroundMusic = parentDir + "/resources/sounds/background.wav";
 	std::string startRaceSound = parentDir + "/resources/sounds/start_race.wav";
 	PlayMusic(backgroundMusic);
@@ -417,10 +416,10 @@ int main(int argc, char** argv)
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
 	// Textures
-	unsigned int floorTextureDay = CreateTexture(strExePath + "\\Map.jpg");
-	unsigned int floorTextureNight = CreateTexture(strExePath + "\\MapNight.jpg");
-	unsigned int kartTexture = CreateTexture(strExePath + "\\Kart.jpg");
-	unsigned int treeTexture = CreateTexture(strExePath + "\\Tree.PNG");
+	unsigned int floorTextureDay = CreateTexture(parentDir + "\\resources\\images\\Map.jpg");
+	unsigned int floorTextureNight = CreateTexture(parentDir + "\\resources\\images\\MapNight.jpg");
+	unsigned int kartTexture = CreateTexture(parentDir + "\\resources\\models\\Kart\\Kart.jpg");
+	unsigned int treeTexture = CreateTexture(parentDir + "\\resources\\models\\Tree\\Tree.PNG");
 
 	// Create camera
 	pCamera = new Camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0, 0.0, 3.0));
