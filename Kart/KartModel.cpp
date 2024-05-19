@@ -7,9 +7,9 @@ KartModel::KartModel()
     velocity(0.0f, 0.0f, 0.0f),
     acceleration(0.0f, 0.0f, 0.0f),
     direction(0.0f),
-    speed(30.0f),
-    brakeForce(40.0f),
-    turnSpeed(150.0f) {} // Adjusted turn speed for more responsive turning
+    speed(15.0f),
+    brakeForce(20.0f),
+    turnSpeed(75.0f) {} // Adjusted turn speed for more responsive turning
 
 void KartModel::handleInput(GLFWwindow* window, float deltaTime) {
     float radianDirection = glm::radians(direction);
@@ -20,6 +20,7 @@ void KartModel::handleInput(GLFWwindow* window, float deltaTime) {
     }
     else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
         acceleration = -forwardDirection * brakeForce;
+
     }
     else {
         acceleration = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -37,6 +38,8 @@ void KartModel::handleInput(GLFWwindow* window, float deltaTime) {
         velocity = glm::vec3(0.0f, 0.0f, 0.0f);
         acceleration = glm::vec3(0.0f, 0.0f, 0.0f);
         direction = 0.0f;
+
+
     }
 }
 
