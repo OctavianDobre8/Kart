@@ -1,6 +1,6 @@
 # Karting Simulator inspired by Super Mario Kart franchise, written in C++ using OpenGL API
 
-This is a basic Karting Simulator that implements realistic driving physics that with an interesting cartoon themed map.
+This is a basic Karting Simulator that implements realistic driving physics with an interesting cartoon themed map.
 
 # Team members:
 + mihww
