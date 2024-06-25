@@ -13,6 +13,7 @@ This is a basic Karting Simulator that implements realistic driving physics with
 + **M: toggle music on/off**
 + **N: toggle day/night**
 + **F11: toggle fullscreen**
++ **Mouse scroll: changing FOV - from third person to first person**
 
 # Gameplay:
 _**[Video demo](https://www.youtube.com/watch?v=DczAsCQ7B1w)**_
