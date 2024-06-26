@@ -29,16 +29,3 @@ Watch a [video demo](https://www.youtube.com/watch?v=DczAsCQ7B1w) of the Karting
 ![Karting Simulator Screenshot 2](https://github.com/mihww/Kart/assets/147138758/93b1da65-5bc6-471f-8157-1a46c14dd6b4)
 ![Karting Simulator Screenshot 3](https://github.com/mihww/Kart/assets/147138758/75398784-7d34-4b7f-990c-894e472a39f7)
 
-## Usage
-
-- **Driving the Kart:**
-  - Use `W`, `A`, `S`, and `D` keys to move the kart.
-  - Press `SPACE` to brake.
-
-- **Toggling Features:**
-  - Press `M` to toggle the music on or off.
-  - Press `N` to switch between day and night modes.
-  - Press `F11` to toggle fullscreen mode.
-
-- **Changing View:**
-  - Use the mouse scroll to change the field of view (FOV), switching between third person and first person perspectives.
