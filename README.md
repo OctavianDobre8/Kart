@@ -5,8 +5,8 @@ Inspired by the Super Mario Kart franchise, this is a basic Karting Simulator th
 
 ## Team Members
 - **mihww**
-- **RalucaDavid**
-- **OctavianDobre8**
+- [**RalucaDavid**](https://github.com/RalucaDavid)
+- [**OctavianDobre8**](https://github.com/OctavianDobre8)
 
 ## Features
 - **Movement Controls:**
